@@ -1,5 +1,5 @@
 
-# Corrective RAG (CRAG) Project
+# Corrective RAG (CRAG) 
 
 ## Project Structure
 
