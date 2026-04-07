@@ -1,217 +1,43 @@
-# 🧠 Corrective RAG (CRAG)  
+# 🧠 Corrective RAG (CRAG)
 ### Advanced Retrieval-Augmented Generation with Self-Correction
 
-A production-inspired implementation of **Corrective Retrieval-Augmented Generation (CRAG)** using modern LLM tooling.
-
-This project demonstrates how to build **self-evaluating, adaptive RAG systems** using:
-
-- ⚡ Groq LLM (LLaMA 3.3)
-- 🔍 Tavily Web Search (fallback retrieval)
-- 🧠 Gemini Embeddings
-- 🗂️ Chroma Vector Database
-- 🔗 LangChain (pipeline orchestration)
-- 🧩 LangGraph (stateful graph execution)
+A production-inspired implementation of **Corrective Retrieval-Augmented Generation (CRAG)** using modern LLM tooling. This project demonstrates how to build **self-evaluating, adaptive RAG systems** that mitigate hallucinations and handle retrieval failures gracefully.
 
 ---
 
 ## 📌 What is CRAG?
 
-Traditional RAG systems blindly trust retrieved documents.
+Traditional RAG systems blindly trust retrieved documents, which often leads to hallucinations if the source material is irrelevant or outdated. 
 
 **CRAG (Corrective RAG)** introduces an intelligent validation step:
+> *"Are these retrieved documents actually useful for the user's query?"*
 
-> _“Are these retrieved documents actually useful?”_
-
-If not, the system dynamically switches to **web search**, improving answer quality.
+If the retrieved context is deemed irrelevant, the system dynamically switches to **web search** (via Tavily), ensuring the LLM always has high-quality data before generating an answer.
 
 ---
 
 ## 🔄 System Workflow
 
-
-Retrieve → Grade → (DB or Web)
-↓
-Generate
-↓
-Critique
-↓
-Final Answer
-
-
----
-
-## 🚀 Key Features
-
-- ✅ LLM-based **document relevance grading**
-- 🌐 **Automatic fallback** to web search (Tavily)
-- 🔍 Built-in **self-critique mechanism**
-- ✨ Multi-step **answer refinement**
-- 🔄 Dual implementation:
-  - LangChain (simple pipeline)
-  - LangGraph (scalable architecture)
-
----
-
-## 📁 Project Structure
-
-
-.
-├── crag_langchain.py # LangChain pipeline version
-├── crag_langgraph.py # LangGraph graph-based version
-├── vectorstore.py # Shared Chroma vector DB builder
-├── .env # API keys
-└── README.md
-
-
----
-
-## 🔑 Environment Setup
-
-Create a `.env` file in the root directory:
-
-
-GROQ_API_KEY=your_groq_api_key
+```mermaid
+graph TD
+    A[User Query] --> B[Retrieve Documents]
+    B --> C{Grade Relevance}
+    C -- Relevant --> D[Generate Answer]
+    C -- Irrelevant --> E[Tavily Web Search]
+    E --> D
+    D --> F[Self-Critique]
+    F --> G[Final Refined Answer]
+🚀 Key Features✅ LLM-based Document Grading: Uses a specialized grader prompt to evaluate document relevance.🌐 Automatic Fallback: Seamless integration with Tavily Web Search when local vector data is insufficient.🔍 Self-Critique Mechanism: A secondary LLM pass to review the draft for accuracy and tone.🔄 Dual Implementation: * LangChain: For a clean, sequential pipeline.LangGraph: For stateful, modular, and scalable architecture.📁 Project StructurePlaintext.
+├── crag_langchain.py    # Sequential pipeline version
+├── crag_langgraph.py    # Stateful graph-based version
+├── vectorstore.py       # Shared Chroma DB & Gemini Embedding logic
+├── .env                 # API keys (Groq, Google, Tavily)
+└── README.md            # Project documentation
+⚙️ Installation & Setup1. Clone & InstallBashgit clone [https://github.com/your-username/corrective-rag.git](https://github.com/your-username/corrective-rag.git)
+cd corrective-rag
+pip install langchain langgraph langchain-groq langchain-google-genai chromadb tavily-python python-dotenv
+2. Environment SetupCreate a .env file in the root directory:Code snippetGROQ_API_KEY=your_groq_api_key
 GOOGLE_API_KEY=your_google_api_key
 TAVILY_API_KEY=your_tavily_api_key
-
-
----
-
-## ⚙️ Installation
-
-```bash
-pip install -r requirements.txt
-📦 Required Libraries
-langchain
-langgraph
-langchain-groq
-langchain-google-genai
-chromadb
-tavily-python
-python-dotenv
-🧠 Vector Store (vectorstore.py)
-Loads data from Wikipedia (Artificial Intelligence article)
-Splits into semantic chunks
-Generates embeddings using Gemini
-Stores vectors in Chroma DB
-⏱ First Run
-Takes ~3 minutes (embedding batches)
-⚡ Subsequent Runs
-Loads instantly from disk
-🔹 Version 1 — LangChain (Pipeline)
-
-📄 crag_langchain.py
-
-Flow:
-Retrieve documents
-Grade relevance (LLM)
-Choose:
-Use DB (if relevant)
-Use Web Search (if not)
-Generate answer
-Critique answer
-Rewrite final answer
-▶️ Run
-python crag_langchain.py
-🔹 Version 2 — LangGraph (Graph-Based)
-
-📄 crag_langgraph.py
-
-🧩 Graph Architecture
-START
-  ↓
-retrieve
-  ↓
-grade
-  ├── relevant → use_db
-  └── irrelevant → web_search
-         ↓
-      generate
-         ↓
-      critique
-         ↓
-   final_answer
-         ↓
-        END
-🧠 Why LangGraph?
-Node-based modular design
-Shared state across steps
-Conditional routing
-Production scalability
-▶️ Run
-python crag_langgraph.py
-⚖️ LangChain vs LangGraph
-Feature	LangChain	LangGraph
-Structure	Sequential	Graph-based
-Logic	Linear	Conditional routing
-Complexity	Simple	Scalable
-Use Case	Learning	Production systems
-🧪 Example Query
-query = "What are the main applications of artificial intelligence?"
-💡 Output Includes:
-Initial Answer
-Self-Critique
-Improved Final Answer
-🧠 Core Insight
-if grade == "relevant":
-    use_vector_db()
-else:
-    use_web_search()
-
-👉 This decision-making step is what transforms basic RAG into Corrective RAG (CRAG).
-
-🔍 Tech Stack
-Component	Technology
-LLM	Groq (LLaMA 3.3)
-Embeddings	Gemini
-Vector Store	Chroma DB
-Retrieval	Tavily API
-Orchestration	LangChain
-Execution Flow	LangGraph
-📈 Future Improvements
-🧠 Add conversational memory
-🔁 Multi-query retrieval
-📊 Re-ranking models
-🌐 Streamlit UI
-📚 Multi-document ingestion
-👨‍💻 Author
-
-Ashikur Rahman Ashik
-AI / ML Enthusiast
-
-Focus Areas:
-Retrieval-Augmented Generation (RAG)
-LLM Systems
-Explainable AI
-⭐ Final Thoughts
-
-This project demonstrates:
-
-✔ Retrieval + Reasoning
-✔ Self-evaluation
-✔ Dynamic decision-making
-
-A strong step toward building production-grade AI systems 🚀
-
-📜 License
-
-This project is open-source and available under the MIT License.
-
-
----
-
-## 🔥 Extra (Important Advice)
-
-This README is now **portfolio-level**. To make it even stronger:
-
-- Add a **demo GIF / screen recording**
-- Add **architecture diagram (draw.io)**
-- Deploy with **Streamlit or FastAPI**
-- Add **GitHub badges (stars, license, python version)**
-
----
-
-If you want next step, I can:
-✅ Create **architecture diagram (very important for recruiters)**  
-✅ Add **Streamlit UI code**  
-✅ Optimize your repo to look like **top AI engineer GitHub profile**
+3. Initialize Vector StoreThe first run of vectorstore.py will ingest Wikipedia data, generate Gemini Embeddings, and store them in a local Chroma DB.Bashpython vectorstore.py
+🛠️ Tech StackComponentTechnologyLLMGroq (LLaMA 3.3)EmbeddingsGoogle GeminiVector StoreChroma DBSearch EngineTavily APIOrchestrationLangChain & LangGraph⚖️ LangChain vs. LangGraphFeatureLangChain (Pipeline)LangGraph (Graph)StructureLinear/SequentialCyclic & State-AwareLogicFixed FlowConditional RoutingScalabilityGood for PrototypesBuilt for Production AgentsState ManagementFunctional PassingCentralized State Schema👨‍💻 AuthorAshikur Rahman AI Engineer & Researcher Specializing in Agentic RAG, Explainable AI (XAI), and Time-Series Forecasting.📜 LicenseThis project is open-source and available under the MIT License.
