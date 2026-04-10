@@ -1,1 +1,1 @@
-ashik.
+.ashik.
