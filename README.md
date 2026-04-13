@@ -1,5 +1,5 @@
 
-# RAGAS Learning Project — Google Gemini + ChromaDB
+# RAGAS Learning Project 
 
 A simple RAG pipeline that **evaluates itself** using RAGAS metrics.
 Uses **Google Gemini (free)** as the LLM and **ChromaDB (persistent)** as the vector store.
